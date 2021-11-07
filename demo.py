@@ -13,19 +13,25 @@ def crop_and_pred(img_path, bbox, model):
     cv2.rectangle(img, (x_min, y_min), (x_max, y_max), (0,0,0), 1)
     yaw, pitch, roll = model.get_angle(img_rgb)
     draw_axis(img, yaw, pitch, roll, tdx=(x_min+x_max)/2, tdy=(y_min+y_max)/2, size = abs(x_max-x_min))
-    cv2.imshow('output',img)
-    cv2.waitKey(5000)
+    x_cent = int((x_min+x_max)/2) 
+    y_cent = int((y_min+y_max)/2)
+    cv2.putText(img, "yaw: {}".format(np.round(yaw)), (int(x_cent), int(y_cent)), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (100, 255, 0), 1)
+    cv2.putText(img, "pitch: {}".format(np.round(pitch)), (int(x_cent), int(y_cent) - 
+15), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (100, 255, 0), 1)
+    cv2.putText(img, "roll: {}".format(np.round(roll)), (int(x_cent), int(y_cent)-30), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (100, 255, 0), 1)
+    cv2.imwrite(f'{img_path[:-4]}_infer.jpg',img)
 
 if __name__ == "__main__":
     model = WHENet('WHENet.h5')
-    root = 'Sample/'
+    root = 'SSample/'
     print(model.model.summary())
 
-    with open('Sample/bbox.txt', 'r') as f:
+    with open(f'{root}/annotation.txt', 'r') as f:
         lines = f.readlines()
 
     for l in lines:
         filename, bbox =l.split(',')
         bbox = bbox.split(' ')
-        bbox = [int(b) for b in bbox]
+        # bbox = [int(b) for b in bbox]
+        bbox = [0,0,256,256]
         crop_and_pred(root+filename,bbox, model)
